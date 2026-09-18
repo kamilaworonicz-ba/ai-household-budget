@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Household Ledger — Add Transaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF0EA;
+    --bg-raised: #F7F8F3;
+    --ink: #1E2A22;
+    --ink-soft: #52604F;
+    --line: #CBCFBF;
+    --line-soft: #DDE0D3;
+    --income: #2F6F4E;
+    --expense: #8B4030;
+    --gold: #A9822C;
+    --focus: #2F6F4E;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171C16;
+      --bg-raised: #1E251C;
+      --ink: #E7EBE1;
+      --ink-soft: #A2AC97;
+      --line: #333D2E;
+      --line-soft: #262E22;
+      --income: #6FBF8F;
+      --expense: #D98F79;
+      --gold: #D8B45C;
+      --focus: #6FBF8F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171C16;
+    --bg-raised: #1E251C;
+    --ink: #E7EBE1;
+    --ink-soft: #A2AC97;
+    --line: #333D2E;
+    --line-soft: #262E22;
+    --income: #6FBF8F;
+    --expense: #D98F79;
+    --gold: #D8B45C;
+    --focus: #6FBF8F;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    padding: 32px 20px 64px;
+  }
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  header.page {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 26px;
+  }
+  header.page h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 24px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  header.page .subtitle {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+
+  form {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+  }
+
+  .row { display: flex; gap: 16px; margin-bottom: 18px; }
+  .row .field { flex: 1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .field:last-of-type { margin-bottom: 0; }
+  .field label {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .field .required { color: var(--expense); }
+  .field select, .field input, .field textarea {
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 11px;
+    width: 100%;
+  }
+  .field input[type="number"] { font-family: var(--font-mono); }
+  .amount-wrap { position: relative; }
+  .amount-wrap .currency {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    pointer-events: none;
+  }
+  .amount-wrap input { padding-left: 24px; }
+  .field select:focus, .field input:focus, .field textarea:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  .field textarea { resize: vertical; min-height: 60px; font-family: var(--font-body); }
+
+  .type-toggle {
+    display: flex;
+    gap: 8px;
+  }
+  .type-toggle button {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 0;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink-soft);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .type-toggle button.active[data-type="expense"] {
+    background: var(--expense);
+    border-color: var(--expense);
+    color: #fff;
+  }
+  .type-toggle button.active[data-type="income"] {
+    background: var(--income);
+    border-color: var(--income);
+    color: #fff;
+  }
+
+  .submit-btn {
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px 0;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .submit-btn:hover { opacity: 0.9; }
+
+  .status-msg {
+    text-align: center;
+    font-size: 13px;
+    color: var(--income);
+    margin-top: 14px;
+    min-height: 18px;
+  }
+
+  .ledger-link {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--bg-raised);
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    padding: 12px 0;
+    margin-top: 22px;
+  }
+  .ledger-link:hover { background: var(--line-soft); }
+  .ledger-link .arrow { font-family: var(--font-mono); margin-left: 6px; }
+
+  .recent {
+    margin-top: 36px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .recent h2 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--ink-soft);
+  }
+  .recent-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .recent-item .meta {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .recent-item .amt { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+  .recent-item .amt.income { color: var(--income); }
+  .recent-item .amt.expense { color: var(--expense); }
+  .recent-empty { color: var(--ink-soft); font-size: 13px; font-style: italic; }
+
+  footer.note {
+    margin-top: 32px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>Household Ledger</h1>
+    <div class="subtitle">page 1 — add transaction</div>
+  </header>
+
+  <form id="entryForm">
+    <div class="field">
+      <label>Type <span class="required">*</span></label>
+      <div class="type-toggle">
+        <button type="button" data-type="expense" class="active">Expense</button>
+        <button type="button" data-type="income">Income</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="date">Date <span class="required">*</span></label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="field">
+        <label for="amount">Amount <span class="required">*</span></label>
+        <div class="amount-wrap">
+          <span class="currency">$</span>
+          <input type="number" id="amount" step="0.01" min="0" placeholder="0.00" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="category">Category <span class="required">*</span></label>
+        <select id="category" required></select>
+      </div>
+      <div class="field">
+        <label for="person">Person <span class="required">*</span></label>
+        <select id="person" required>
+          <option value="Person A">Person A</option>
+          <option value="Person B">Person B</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="comment">Comment (optional)</label>
+      <textarea id="comment" placeholder="Add a note..."></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">Add transaction</button>
+    <div class="status-msg" id="statusMsg"></div>
+  </form>
+
+  <a class="ledger-link" href="budget-summary.html">
+    View expense ledger <span class="arrow">→</span>
+  </a>
+
+  <div class="recent">
+    <h2>Added this session</h2>
+    <div id="recentList"><div class="recent-empty">No transactions added yet.</div></div>
+  </div>
+
+  <footer class="note">Entries are saved to this browser's local storage. They will appear on the summary page automatically once both pages are hosted on the same site (e.g. GitHub Pages) — this cross-page sync does not work between separate claude.ai preview links.</footer>
+
+</div>
+
+<script>
+  const CATEGORIES = ["entertainment", "food", "household", "kids", "vacation", "work", "other"];
+
+  const categorySelect = document.getElementById("category");
+  CATEGORIES.forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    categorySelect.appendChild(opt);
+  });
+
+  // Default date to today, editable by typing or via the calendar picker
+  const dateInput = document.getElementById("date");
+  const today = new Date();
+  const iso = today.toISOString().slice(0, 10);
+  dateInput.value = iso;
+
+  let currentType = "expense";
+  document.querySelectorAll(".type-toggle button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".type-toggle button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentType = btn.dataset.type;
+    });
+  });
+
+  const SHARED_KEY = "hl_transactions";
+  const NEXT_ID_KEY = "hl_next_id";
+
+  function getNextId() {
+    let next = parseInt(localStorage.getItem(NEXT_ID_KEY) || "1001", 10);
+    localStorage.setItem(NEXT_ID_KEY, String(next + 1));
+    return next;
+  }
+
+  function saveToSharedStorage(entry) {
+    try {
+      const signedAmount = entry.type === "expense" ? -Math.abs(entry.amount) : Math.abs(entry.amount);
+      const stored = JSON.parse(localStorage.getItem(SHARED_KEY) || "[]");
+      stored.push({ ...entry, amount: signedAmount });
+      localStorage.setItem(SHARED_KEY, JSON.stringify(stored));
+    } catch (e) {
+      // localStorage unavailable (e.g. private browsing) — entry stays visible only in this session
+    }
+  }
+
+  const sessionEntries = [];
+  const fmt = (n) => "$" + Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtDate = (isoStr) => {
+    const [y, m, d] = isoStr.split("-");
+    return `${m}/${d}/${y}`;
+  };
+
+  function renderRecent() {
+    const list = document.getElementById("recentList");
+    if (sessionEntries.length === 0) {
+      list.innerHTML = `<div class="recent-empty">No transactions added yet.</div>`;
+      return;
+    }
+    list.innerHTML = "";
+    sessionEntries.slice().reverse().forEach(e => {
+      const row = document.createElement("div");
+      row.className = "recent-item";
+      row.innerHTML = `
+        <span>
+          ${e.category.charAt(0).toUpperCase() + e.category.slice(1)} — ${e.person}
+          ${e.comment ? `<br><span class="meta">${e.comment}</span>` : ""}
+        </span>
+        <span class="amt ${e.type}">
+          ${e.type === "income" ? "+" : "-"}${fmt(e.amount)}
+          <br><span class="meta">${fmtDate(e.date)}</span>
+        </span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById("entryForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const amountVal = parseFloat(document.getElementById("amount").value);
+    if (isNaN(amountVal) || amountVal <= 0) return;
+
+    const entry = {
+      id: getNextId(),
+      date: dateInput.value || iso,
+      type: currentType,
+      category: categorySelect.value,
+      person: document.getElementById("person").value,
+      amount: amountVal,
+      comment: document.getElementById("comment").value.trim()
+    };
+    sessionEntries.push(entry);
+    renderRecent();
+    saveToSharedStorage(entry);
+
+    const status = document.getElementById("statusMsg");
+    status.textContent = "Transaction added.";
+    setTimeout(() => { status.textContent = ""; }, 2500);
+
+    document.getElementById("amount").value = "";
+    document.getElementById("comment").value = "";
+    dateInput.value = iso;
+  });
+</script>
+</body>
+</html>
