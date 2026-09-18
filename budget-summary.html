@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Household Ledger — Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF0EA;
+    --bg-raised: #F7F8F3;
+    --ink: #1E2A22;
+    --ink-soft: #52604F;
+    --line: #CBCFBF;
+    --line-soft: #DDE0D3;
+    --income: #2F6F4E;
+    --income-soft: #E3EEE3;
+    --expense: #8B4030;
+    --expense-soft: #F1E4DE;
+    --gold: #A9822C;
+    --gold-soft: #F0E7CE;
+    --focus: #2F6F4E;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171C16;
+      --bg-raised: #1E251C;
+      --ink: #E7EBE1;
+      --ink-soft: #A2AC97;
+      --line: #333D2E;
+      --line-soft: #262E22;
+      --income: #6FBF8F;
+      --income-soft: #22301F;
+      --expense: #D98F79;
+      --expense-soft: #332420;
+      --gold: #D8B45C;
+      --gold-soft: #322A16;
+      --focus: #6FBF8F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171C16;
+    --bg-raised: #1E251C;
+    --ink: #E7EBE1;
+    --ink-soft: #A2AC97;
+    --line: #333D2E;
+    --line-soft: #262E22;
+    --income: #6FBF8F;
+    --income-soft: #22301F;
+    --expense: #D98F79;
+    --expense-soft: #332420;
+    --gold: #D8B45C;
+    --gold-soft: #322A16;
+    --focus: #6FBF8F;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    padding: 32px 20px 64px;
+  }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  header.page {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+  }
+  header.page h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  header.page .subtitle {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+
+  .ledger-strip {
+    display: flex;
+    gap: 0;
+    margin: 22px 0 28px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg-raised);
+  }
+  .ledger-strip .cell {
+    flex: 1;
+    padding: 14px 18px;
+    border-right: 1px solid var(--line);
+  }
+  .ledger-strip .cell:last-child { border-right: none; }
+  .ledger-strip .cell .label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .ledger-strip .cell .value {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .ledger-strip .cell.income .value { color: var(--income); }
+  .ledger-strip .cell.expense .value { color: var(--expense); }
+  .ledger-strip .cell.balance .value { color: var(--gold); }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: end;
+    padding: 16px 0 18px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .field label {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .field select, .field input {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--ink);
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 7px 9px;
+    min-width: 120px;
+  }
+  .field input.amount-input { min-width: 90px; }
+  .field select:focus, .field input:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+  .field.dates { flex-direction: row; align-items: end; gap: 8px; }
+  .field.dates .sub { display: flex; flex-direction: column; gap: 5px; }
+  .field.dates .sub label { font-size: 10px; }
+  .reset-btn {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 7px 0;
+  }
+  .reset-btn:hover { color: var(--ink); }
+  .count-note {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    align-self: end;
+    padding-bottom: 7px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+    font-size: 13.5px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th.num { text-align: right; }
+  thead th .arrow { font-size: 10px; margin-left: 3px; opacity: 0.6; }
+  thead th:hover { color: var(--ink); }
+  tbody td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: middle;
+  }
+  tbody tr:hover { background: var(--bg-raised); }
+  td.id { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+  td.date { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+  td.amount {
+    font-family: var(--font-mono);
+    text-align: right;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  td.amount.income { color: var(--income); }
+  td.amount.expense { color: var(--expense); }
+  td.comment { color: var(--ink-soft); }
+  .cat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+  .cat-tag .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .type-tag {
+    font-size: 11.5px;
+    font-family: var(--font-mono);
+  }
+  .type-tag.income { color: var(--income); }
+  .type-tag.expense { color: var(--expense); }
+
+  tfoot td {
+    padding: 12px 10px;
+    border-top: 2px solid var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  tfoot .sum-label { font-family: var(--font-body); font-weight: 500; color: var(--ink-soft); text-align: right; }
+  tfoot .sum-value { text-align: right; font-size: 15px; }
+  tfoot .sum-value.positive { color: var(--income); }
+  tfoot .sum-value.negative { color: var(--expense); }
+
+  .empty-row td {
+    text-align: center;
+    color: var(--ink-soft);
+    padding: 30px 10px;
+    font-style: italic;
+  }
+
+  .chart-section {
+    margin-top: 44px;
+    padding-top: 24px;
+    border-top: 2px solid var(--ink);
+  }
+  .chart-section h2 {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .chart-section .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 90px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .bar-row .cat-tag { font-size: 13px; }
+  .bar-track {
+    height: 14px;
+    background: var(--line-soft);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .bar-row .bar-value {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    text-align: right;
+    color: var(--ink-soft);
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  .del-col { width: 34px; }
+  td.del-col-cell { text-align: center; padding: 0; }
+  .delete-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    padding: 6px;
+    color: var(--ink-soft);
+    transition: opacity 0.12s, color 0.12s;
+  }
+  tbody tr:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { color: var(--expense); }
+  .delete-btn:focus-visible { opacity: 1; outline: 2px solid var(--focus); }
+
+  .add-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--ink);
+    border: none;
+    border-radius: 3px;
+    padding: 13px 0;
+    margin-top: 20px;
+  }
+  .add-btn:hover { opacity: 0.9; }
+  .add-btn .plus { font-family: var(--font-mono); margin-right: 6px; }
+
+  footer.note {
+    margin-top: 40px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .ledger-strip { flex-direction: column; }
+    .ledger-strip .cell { border-right: none; border-bottom: 1px solid var(--line); }
+    .ledger-strip .cell:last-child { border-bottom: none; }
+    .bar-row { grid-template-columns: 100px 1fr 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>Household Ledger</h1>
+    <div class="subtitle">page 2 — summary</div>
+  </header>
+
+  <div class="ledger-strip">
+    <div class="cell income">
+      <div class="label">Income (visible)</div>
+      <div class="value" id="sumIncome">$0.00</div>
+    </div>
+    <div class="cell expense">
+      <div class="label">Expenses (visible)</div>
+      <div class="value" id="sumExpense">$0.00</div>
+    </div>
+    <div class="cell balance">
+      <div class="label">Balance (visible)</div>
+      <div class="value" id="sumBalance">$0.00</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="field dates">
+      <div class="sub">
+        <label for="dateFrom">Date from</label>
+        <input type="date" id="dateFrom">
+      </div>
+      <div class="sub">
+        <label for="dateTo">Date to</label>
+        <input type="date" id="dateTo">
+      </div>
+    </div>
+    <div class="field">
+      <label for="typeFilter">Type</label>
+      <select id="typeFilter">
+        <option value="">All</option>
+        <option value="expense">Expense</option>
+        <option value="income">Income</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="categoryFilter">Category</label>
+      <select id="categoryFilter">
+        <option value="">All</option>
+      </select>
+    </div>
+    <div class="field dates">
+      <div class="sub">
+        <label for="amountMin">Amount min</label>
+        <input type="number" step="0.01" id="amountMin" class="amount-input" placeholder="0.00">
+      </div>
+      <div class="sub">
+        <label for="amountMax">Amount max</label>
+        <input type="number" step="0.01" id="amountMax" class="amount-input" placeholder="0.00">
+      </div>
+    </div>
+    <div class="field">
+      <label for="sortSelect">Sort by</label>
+      <select id="sortSelect">
+        <option value="date-asc">Date (oldest first)</option>
+        <option value="date-desc">Date (newest first)</option>
+        <option value="amount-asc">Amount (low to high)</option>
+        <option value="amount-desc">Amount (high to low)</option>
+      </select>
+    </div>
+    <button class="reset-btn" id="resetBtn">clear filters</button>
+    <div class="count-note" id="countNote"></div>
+  </div>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="id">ID</th>
+          <th data-sort="date">Date <span class="arrow" id="arrow-date"></span></th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Person</th>
+          <th class="num" data-sort="amount">Amount <span class="arrow" id="arrow-amount"></span></th>
+          <th>Comment</th>
+          <th class="del-col"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" class="sum-label">TOTAL (filtered rows, income + expenses):</td>
+          <td class="sum-value" id="footSum">$0.00</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <a class="add-btn" href="budget-entry.html">
+    <span class="plus">+</span> Add transaction
+  </a>
+
+  <div class="chart-section">
+    <h2>Total expenses by category</h2>
+    <p class="hint">Reflects expenses only, within the currently applied filters.</p>
+    <div id="chartContainer"></div>
+  </div>
+
+  <footer class="note">Includes sample data plus any entries added on page #1, when both pages are hosted on the same site (e.g. GitHub Pages).</footer>
+
+</div>
+
+<script>
+  const CATEGORIES = {
+    "entertainment": "#A9822C",
+    "food":          "#8B4030",
+    "household":     "#4C6E8A",
+    "kids":          "#B15D8A",
+    "vacation":      "#2F8F8F",
+    "work":          "#5B6B4E",
+    "other":         "#8C8C8C"
+  };
+
+  const transactions = [
+    { id: 1,  date: "2026-08-02", type: "income",  category: "work",          person: "Person A", amount: 6200.00, comment: "Salary — August" },
+    { id: 2,  date: "2026-08-03", type: "expense",  category: "household",     person: "Person A", amount: -1450.00, comment: "Rent" },
+    { id: 3,  date: "2026-08-04", type: "expense",  category: "food",          person: "Person B", amount: -238.50,  comment: "Groceries — supermarket" },
+    { id: 4,  date: "2026-08-05", type: "expense",  category: "kids",          person: "Person B", amount: -120.00,  comment: "Swimming lessons" },
+    { id: 5,  date: "2026-08-07", type: "expense",  category: "entertainment", person: "Person A", amount: -85.00,   comment: "Cinema" },
+    { id: 6,  date: "2026-08-09", type: "expense",  category: "food",          person: "Person B", amount: -64.20,   comment: "Groceries — discount store" },
+    { id: 7,  date: "2026-08-10", type: "expense",  category: "household",     person: "Person A", amount: -320.00,  comment: "Electricity bill" },
+    { id: 8,  date: "2026-08-12", type: "income",   category: "other",        person: "Person B", amount: 300.00,   comment: "Tax refund" },
+    { id: 9,  date: "2026-08-14", type: "expense",  category: "vacation",      person: "Person A", amount: -1800.00, comment: "Accommodation — Croatia" },
+    { id: 10, date: "2026-08-14", type: "expense",  category: "vacation",      person: "Person A", amount: -420.00,  comment: "Flight tickets" },
+    { id: 11, date: "2026-08-16", type: "expense",  category: "food",          person: "Person B", amount: -142.75,  comment: "Restaurant — birthday dinner" },
+    { id: 12, date: "2026-08-18", type: "expense",  category: "kids",          person: "Person B", amount: -95.00,   comment: "School shoes" },
+    { id: 13, date: "2026-08-20", type: "expense",  category: "entertainment", person: "Person A", amount: -49.00,   comment: "Netflix + Spotify" },
+    { id: 14, date: "2026-08-21", type: "expense",  category: "other",         person: "Person B", amount: -60.00,   comment: "Birthday gift" },
+    { id: 15, date: "2026-08-23", type: "expense",  category: "household",     person: "Person A", amount: -75.30,   comment: "Cleaning supplies" },
+    { id: 16, date: "2026-08-25", type: "expense",  category: "food",          person: "Person B", amount: -210.00,  comment: "Groceries — hypermarket" },
+    { id: 17, date: "2026-08-27", type: "income",   category: "work",          person: "Person B", amount: 850.00,   comment: "Freelance — proofreading" },
+    { id: 18, date: "2026-08-29", type: "expense",  category: "entertainment", person: "Person A", amount: -130.00,  comment: "Concert" },
+    { id: 19, date: "2026-09-01", type: "income",   category: "work",          person: "Person A", amount: 6200.00,  comment: "Salary — September" },
+    { id: 20, date: "2026-09-02", type: "expense",  category: "household",     person: "Person A", amount: -1450.00, comment: "Rent" },
+    { id: 21, date: "2026-09-04", type: "expense",  category: "food",          person: "Person B", amount: -198.40,  comment: "Groceries — supermarket" },
+    { id: 22, date: "2026-09-06", type: "expense",  category: "kids",          person: "Person B", amount: -150.00,  comment: "Textbooks" },
+    { id: 23, date: "2026-09-10", type: "expense",  category: "other",         person: "Person A", amount: -40.00,   comment: "Pharmacy" },
+    { id: 24, date: "2026-09-12", type: "expense",  category: "household",     person: "Person B", amount: -290.00,  comment: "Gas bill" },
+  ];
+
+  const SHARED_KEY = "hl_transactions";
+  try {
+    const added = JSON.parse(localStorage.getItem(SHARED_KEY) || "[]");
+    if (Array.isArray(added)) transactions.push(...added);
+  } catch (e) {
+    // localStorage unavailable — falls back to sample data only
+  }
+
+  let state = {
+    dateFrom: "",
+    dateTo: "",
+    type: "",
+    category: "",
+    amountMin: "",
+    amountMax: "",
+    sortKey: "date",
+    sortDir: "asc"
+  };
+
+  const fmt = (n) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtDate = (iso) => {
+    const [y, m, d] = iso.split("-");
+    return `${m}/${d}/${y}`;
+  };
+
+  function populateCategoryFilter() {
+    const sel = document.getElementById("categoryFilter");
+    Object.keys(CATEGORIES).forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      sel.appendChild(opt);
+    });
+  }
+
+  function getFiltered() {
+    let rows = transactions.filter(t => {
+      if (state.dateFrom && t.date < state.dateFrom) return false;
+      if (state.dateTo && t.date > state.dateTo) return false;
+      if (state.type && t.type !== state.type) return false;
+      if (state.category && t.category !== state.category) return false;
+      const absAmount = Math.abs(t.amount);
+      if (state.amountMin !== "" && absAmount < parseFloat(state.amountMin)) return false;
+      if (state.amountMax !== "" && absAmount > parseFloat(state.amountMax)) return false;
+      return true;
+    });
+    rows.sort((a, b) => {
+      let av = a[state.sortKey], bv = b[state.sortKey];
+      if (state.sortKey === "amount") { av = a.amount; bv = b.amount; }
+      if (av < bv) return state.sortDir === "asc" ? -1 : 1;
+      if (av > bv) return state.sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return rows;
+  }
+
+  function render() {
+    const rows = getFiltered();
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="8">No transactions match the selected filters.</td></tr>`;
+    } else {
+      rows.forEach(t => {
+        const tr = document.createElement("tr");
+        const color = CATEGORIES[t.category] || "#8C8C8C";
+        const isIncome = t.type === "income";
+        tr.innerHTML = `
+          <td class="id">#${String(t.id).padStart(4, "0")}</td>
+          <td class="date">${fmtDate(t.date)}</td>
+          <td><span class="type-tag ${isIncome ? "income" : "expense"}">${t.type}</span></td>
+          <td><span class="cat-tag"><span class="dot" style="background:${color}"></span>${t.category}</span></td>
+          <td>${t.person}</td>
+          <td class="amount ${isIncome ? "income" : "expense"}">${isIncome ? "+" : ""}${fmt(t.amount)}</td>
+          <td class="comment">${t.comment}</td>
+          <td class="del-col-cell"><button class="delete-btn" data-id="${t.id}" title="Delete transaction" aria-label="Delete transaction">🗑</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    const income = rows.filter(r => r.amount > 0).reduce((s, r) => s + r.amount, 0);
+    const expense = rows.filter(r => r.amount < 0).reduce((s, r) => s + r.amount, 0);
+    const balance = income + expense;
+
+    document.getElementById("sumIncome").textContent = fmt(income);
+    document.getElementById("sumExpense").textContent = fmt(Math.abs(expense));
+    document.getElementById("sumBalance").textContent = (balance >= 0 ? "+" : "") + fmt(balance);
+
+    const footSum = document.getElementById("footSum");
+    footSum.textContent = (balance >= 0 ? "+" : "") + fmt(balance);
+    footSum.className = "sum-value " + (balance >= 0 ? "positive" : "negative");
+
+    document.getElementById("countNote").textContent = `${rows.length} of ${transactions.length} entries`;
+
+    document.getElementById("arrow-date").textContent = "";
+    document.getElementById("arrow-amount").textContent = "";
+    const arrowId = state.sortKey === "date" ? "arrow-date" : (state.sortKey === "amount" ? "arrow-amount" : null);
+    if (arrowId) document.getElementById(arrowId).textContent = state.sortDir === "asc" ? "↑" : "↓";
+
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", handleDeleteClick);
+    });
+
+    renderChart(rows);
+  }
+
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function generateMathChallenge() {
+    const ops = ["+", "-", "*", "/"];
+    const op = ops[randInt(0, 3)];
+    let a, b, answer, question;
+    if (op === "+") {
+      a = randInt(2, 40); b = randInt(2, 40);
+      answer = a + b; question = `${a} + ${b}`;
+    } else if (op === "-") {
+      a = randInt(10, 50); b = randInt(1, a);
+      answer = a - b; question = `${a} − ${b}`;
+    } else if (op === "*") {
+      a = randInt(2, 12); b = randInt(2, 12);
+      answer = a * b; question = `${a} × ${b}`;
+    } else {
+      b = randInt(2, 12); answer = randInt(2, 12); a = b * answer;
+      question = `${a} ÷ ${b}`;
+    }
+    return { question, answer };
+  }
+
+  function removeFromSharedStorage(id) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(SHARED_KEY) || "[]");
+      localStorage.setItem(SHARED_KEY, JSON.stringify(stored.filter(e => e.id !== id)));
+    } catch (e) {
+      // localStorage unavailable — nothing to clean up
+    }
+  }
+
+  function handleDeleteClick(e) {
+    const id = parseInt(e.currentTarget.dataset.id, 10);
+
+    const confirmed = window.confirm(
+      "Delete this transaction?\n\nThis action is permanent and cannot be undone."
+    );
+    if (!confirmed) return;
+
+    const challenge = generateMathChallenge();
+    const raw = window.prompt(`To confirm deletion, solve: ${challenge.question} = ?`);
+    if (raw === null) return; // user cancelled
+
+    const given = parseFloat(raw.trim());
+    if (isNaN(given) || Math.abs(given - challenge.answer) > 0.0001) {
+      window.alert("Incorrect answer — deletion cancelled.");
+      return;
+    }
+
+    const idx = transactions.findIndex(t => t.id === id);
+    if (idx !== -1) transactions.splice(idx, 1);
+    removeFromSharedStorage(id);
+    render();
+  }
+
+  function renderChart(rows) {
+    const totals = {};
+    Object.keys(CATEGORIES).forEach(c => totals[c] = 0);
+    rows.filter(r => r.amount < 0).forEach(r => { totals[r.category] += Math.abs(r.amount); });
+
+    const max = Math.max(1, ...Object.values(totals));
+    const container = document.getElementById("chartContainer");
+    container.innerHTML = "";
+
+    Object.entries(totals)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([cat, val]) => {
+        const pct = (val / max) * 100;
+        const color = CATEGORIES[cat];
+        const row = document.createElement("div");
+        row.className = "bar-row";
+        row.innerHTML = `
+          <span class="cat-tag"><span class="dot" style="background:${color}"></span>${cat}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color}"></div></div>
+          <span class="bar-value">${fmt(val)}</span>
+        `;
+        container.appendChild(row);
+      });
+  }
+
+  document.getElementById("dateFrom").addEventListener("change", e => { state.dateFrom = e.target.value; render(); });
+  document.getElementById("dateTo").addEventListener("change", e => { state.dateTo = e.target.value; render(); });
+  document.getElementById("typeFilter").addEventListener("change", e => { state.type = e.target.value; render(); });
+  document.getElementById("categoryFilter").addEventListener("change", e => { state.category = e.target.value; render(); });
+  document.getElementById("amountMin").addEventListener("input", e => { state.amountMin = e.target.value; render(); });
+  document.getElementById("amountMax").addEventListener("input", e => { state.amountMax = e.target.value; render(); });
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    state = { dateFrom: "", dateTo: "", type: "", category: "", amountMin: "", amountMax: "", sortKey: "date", sortDir: "asc" };
+    document.getElementById("dateFrom").value = "";
+    document.getElementById("dateTo").value = "";
+    document.getElementById("typeFilter").value = "";
+    document.getElementById("categoryFilter").value = "";
+    document.getElementById("amountMin").value = "";
+    document.getElementById("amountMax").value = "";
+    render();
+  });
+  document.getElementById("sortSelect").addEventListener("change", e => {
+    const [key, dir] = e.target.value.split("-");
+    state.sortKey = key;
+    state.sortDir = dir;
+    render();
+  });
+  document.querySelectorAll("th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sort;
+      if (state.sortKey === key) {
+        state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+      } else {
+        state.sortKey = key;
+        state.sortDir = "asc";
+      }
+      document.getElementById("sortSelect").value = `${state.sortKey}-${state.sortDir}`;
+      render();
+    });
+  });
+
+  populateCategoryFilter();
+  render();
+</script>
+</body>
+</html>
