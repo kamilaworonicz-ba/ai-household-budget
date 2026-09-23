@@ -238,7 +238,9 @@
     font-size: 11.5px;
     color: var(--ink-soft);
     text-align: center;
+    line-height: 1.7;
   }
+  footer.note a { color: inherit; text-underline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -304,7 +306,11 @@
     <div id="recentList"><div class="recent-empty">No transactions added yet.</div></div>
   </div>
 
-  <footer class="note">Entries are saved to this browser's local storage. They will appear on the summary page automatically once both pages are hosted on the same site (e.g. GitHub Pages) — this cross-page sync does not work between separate claude.ai preview links.</footer>
+  <footer class="note">
+    <p>Entries are saved in this browser and appear on the summary page.</p>
+    <p>Learn about the concept, features and AI-assisted development in the <a href="https://github.com/kamilaworonicz-ba/ai-household-budget/blob/main/README.md">README</a>.</p>
+    <p>Kamila Woronicz · <a href="mailto:kamila.woronicz@gmail.com">kamila.woronicz@gmail.com</a></p>
+  </footer>
 
 </div>
 

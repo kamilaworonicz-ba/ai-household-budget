@@ -340,7 +340,9 @@
     font-size: 11.5px;
     color: var(--ink-soft);
     text-align: center;
+    line-height: 1.7;
   }
+  footer.note a { color: inherit; text-underline-offset: 2px; }
 
   @media (max-width: 640px) {
     .ledger-strip { flex-direction: column; }
@@ -458,7 +460,11 @@
     <div id="chartContainer"></div>
   </div>
 
-  <footer class="note">Includes sample data plus any entries added on page #1, when both pages are hosted on the same site (e.g. GitHub Pages).</footer>
+  <footer class="note">
+    <p>The ledger includes sample data and transactions added in this browser.</p>
+    <p>Learn about the concept, features and AI-assisted development in the <a href="https://github.com/kamilaworonicz-ba/ai-household-budget/blob/main/README.md">README</a>.</p>
+    <p>Kamila Woronicz · <a href="mailto:kamila.woronicz@gmail.com">kamila.woronicz@gmail.com</a></p>
+  </footer>
 
 </div>
 
