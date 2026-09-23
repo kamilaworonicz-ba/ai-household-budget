@@ -46,10 +46,6 @@ README.md
 
 ## 📬 Contact
 
-**Kamila Woronicz**
-Product Project Manager | Business Analyst
+**Kamila Woronicz**<br>
+Product Project Manager | Business Analyst<br>
 <kamila.woronicz@gmail.com>
-
----
-
-**README** · [Why This Project Exists →](#-why-this-project-exists) · [What the App Does →](#-what-the-app-does) · [Prototype Scope →](#-prototype-scope) · [Files →](#-files) · [Contact →](#-contact)
