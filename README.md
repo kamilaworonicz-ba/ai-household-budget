@@ -1,14 +1,16 @@
 # AI-Built Household Budget Tracker
+### AI-Assisted Development Case Study
 
 A lightweight, two-page household budget app — one page for logging transactions, one for reviewing, filtering and summing them — built end-to-end with AI-assisted development.
 
-`Status: Prototype` `Type: Portfolio Concept` `Domain: Personal Finance / Content Growth` `Methods: AI-Assisted Development / No-Backend Architecture`
+`Status: Prototype` `Type: AI-Built Prototype` `Domain: Personal Finance / Content Growth` <br>
+`Methods: AI-Assisted Development / No-Backend Architecture`
 
 🔗 **[Try the app](https://kamilaworonicz-ba.github.io/ai-household-budget/budget-entry.html)**
 
 ## 🎯 Why This Project Exists
 
-This prototype was built as a companion piece to my [Digital Editorial Workflow System](https://github.com/kamilaworonicz-ba/digital-editorial-workflow) case study and [What Kind of Math Learner Are You?](https://kamilaworonicz-ba.github.io/ai-math-path-quiz/) quiz, to demonstrate a third kind of skill relevant to a Content Growth Manager role: shipping a small, working, real-world tool by directing an AI coding assistant, rather than writing every line by hand.
+This prototype was built as a companion piece to my [physics textbook product launch](https://github.com/kamilaworonicz-ba/physics-product-launch) case study and [What Kind of Math Learner Are You?](https://kamilaworonicz-ba.github.io/ai-math-path-quiz/) quiz, to demonstrate a third kind of skill relevant to a Content Growth Manager role: shipping a small, working, real-world tool by directing an AI coding assistant, rather than writing every line by hand.
 
 Instead of a content or acquisition experiment, this project starts from an everyday personal need — tracking shared household expenses — and turns it into a working app through a series of concrete product decisions: what data to capture, how to let two people log spending, how to make summaries genuinely useful, and how to protect people from accidentally deleting a record.
 
@@ -44,6 +46,10 @@ README.md
 
 ## 📬 Contact
 
-**Kamila Woronicz**<br>
-Product Project Manager | Business Analyst <br>
+**Kamila Woronicz**
+Product Project Manager | Business Analyst
 <kamila.woronicz@gmail.com>
+
+---
+
+**README** · [Why This Project Exists →](#-why-this-project-exists) · [What the App Does →](#-what-the-app-does) · [Prototype Scope →](#-prototype-scope) · [Files →](#-files) · [Contact →](#-contact)
