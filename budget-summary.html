@@ -400,6 +400,14 @@
         <option value="">All</option>
       </select>
     </div>
+    <div class="field">
+      <label for="personFilter">Person</label>
+      <select id="personFilter">
+        <option value="">All</option>
+        <option value="Person A">Person A</option>
+        <option value="Person B">Person B</option>
+      </select>
+    </div>
     <div class="field dates">
       <div class="sub">
         <label for="amountMin">Amount min</label>
@@ -519,6 +527,7 @@
     dateTo: "",
     type: "",
     category: "",
+    person: "",
     amountMin: "",
     amountMax: "",
     sortKey: "date",
@@ -547,6 +556,7 @@
       if (state.dateTo && t.date > state.dateTo) return false;
       if (state.type && t.type !== state.type) return false;
       if (state.category && t.category !== state.category) return false;
+      if (state.person && t.person !== state.person) return false;
       const absAmount = Math.abs(t.amount);
       if (state.amountMin !== "" && absAmount < parseFloat(state.amountMin)) return false;
       if (state.amountMax !== "" && absAmount > parseFloat(state.amountMax)) return false;
@@ -698,14 +708,16 @@
   document.getElementById("dateTo").addEventListener("change", e => { state.dateTo = e.target.value; render(); });
   document.getElementById("typeFilter").addEventListener("change", e => { state.type = e.target.value; render(); });
   document.getElementById("categoryFilter").addEventListener("change", e => { state.category = e.target.value; render(); });
+  document.getElementById("personFilter").addEventListener("change", e => { state.person = e.target.value; render(); });
   document.getElementById("amountMin").addEventListener("input", e => { state.amountMin = e.target.value; render(); });
   document.getElementById("amountMax").addEventListener("input", e => { state.amountMax = e.target.value; render(); });
   document.getElementById("resetBtn").addEventListener("click", () => {
-    state = { dateFrom: "", dateTo: "", type: "", category: "", amountMin: "", amountMax: "", sortKey: "date", sortDir: "asc" };
+    state = { dateFrom: "", dateTo: "", type: "", category: "", person: "", amountMin: "", amountMax: "", sortKey: "date", sortDir: "asc" };
     document.getElementById("dateFrom").value = "";
     document.getElementById("dateTo").value = "";
     document.getElementById("typeFilter").value = "";
     document.getElementById("categoryFilter").value = "";
+    document.getElementById("personFilter").value = "";
     document.getElementById("amountMin").value = "";
     document.getElementById("amountMax").value = "";
     render();
