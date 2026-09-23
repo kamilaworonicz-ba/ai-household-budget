@@ -45,5 +45,5 @@ README.md
 ## 📬 Contact
 
 **Kamila Woronicz**<br>
-Product Project Manager | Business Analyst
+Product Project Manager | Business Analyst <br>
 <kamila.woronicz@gmail.com>
